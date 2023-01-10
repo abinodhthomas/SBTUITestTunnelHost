@@ -17,6 +17,6 @@ Pod::Spec.new do |s|
 
     s.frameworks = 'XCTest'
 
-    s.source_files = 'SBTUITestTunnelHost/*.{h,m}', 'SBTUITunnelHostServer/*.{h,m}'
+    s.source_files = 'SBTUITestTunnelHost/*.{h,m}', 'SBTUITunnelHostServer/*.{h,m,swift}'
     s.pod_target_xcconfig = { :prebuild_configuration => 'debug' }    
 end
