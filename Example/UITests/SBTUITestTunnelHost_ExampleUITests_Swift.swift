@@ -63,7 +63,7 @@ class SBTUITestTunnelHost_ExampleUITests_Swift: XCTestCase {
         XCTAssert(app.cells["99"].isHittable)
     }
     
-    func testCommandWithAmpersand() throws {
+    func testExecuteCommandWithAmpersand() throws {
         let app = XCUIApplication()
         app.launch()
 
@@ -75,6 +75,44 @@ class SBTUITestTunnelHost_ExampleUITests_Swift: XCTestCase {
         let safari = XCUIApplication(bundleIdentifier: "com.apple.mobilesafari")
 
         wait { safari.state == .runningForeground }
+    }
+    
+    func testLaunchCommandAndTerminate() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        host.connect()
+
+        let id = host.launchCommand("sleep 100")
+        let status = host.getStatusOfCommand(with: id)
+        
+        let pid = try XCTUnwrap(status["pid"] as? Int)
+        let ps = try XCTUnwrap(host.executeCommand("ps -p \(pid)"))
+        XCTAssert(ps.contains("sleep 100"))
+        
+        host.terminateCommand(with: id)
+                
+        let psAfterTerminate = try XCTUnwrap(host.executeCommand("ps -p \(pid)"))
+        XCTAssertFalse(psAfterTerminate.contains("sleep 100"))
+    }
+    
+    func testLaunchCommandAndInterrupt() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        host.connect()
+
+        let id = host.launchCommand("sleep 100")
+        let status = host.getStatusOfCommand(with: id)
+        
+        let pid = try XCTUnwrap(status["pid"] as? Int)
+        let ps = try XCTUnwrap(host.executeCommand("ps -p \(pid)"))
+        XCTAssert(ps.contains("sleep 100"))
+        
+        host.interruptCommand(with: id)
+        
+        let psAfterInterrupt = try XCTUnwrap(host.executeCommand("ps -p \(pid)"))
+        XCTAssertFalse(psAfterInterrupt.contains("sleep 100"))
     }
 
     private func deviceIdentifier() throws -> String {
